@@ -6,12 +6,26 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct Again_LapTrackerApp: App {
+	let modelContainer: ModelContainer
+	
+	init() {
+		do {
+			modelContainer = try ModelContainer(
+				for: Lap.self
+			)
+		} catch {
+			fatalError("Failed to initialize SwiftData container: \(error.localizedDescription)")
+		}
+	}
+	
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TabBarView()
+				.modelContainer(modelContainer)
         }
     }
 }

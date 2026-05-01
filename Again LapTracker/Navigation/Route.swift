@@ -1,6 +1,12 @@
-enum Route: Hashable {
-	case reflection(selectedMood: Mood)
-	case seedGet(entry: MoodEntry)
-	case garden
-	case wateringTransition(seed: MoodEntry)
+//
+//  Route.swift
+//  Again LapTracker
+//
+//  Created by Morgan Harris on 5/1/26.
+//
+
+
+enum Route {
+	case timerView
+	case historyView
 }

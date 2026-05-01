@@ -16,6 +16,8 @@ final class HKViewModel {
 	
 	init() {
 		requestAuthorization()
+		
+//		debugTodaySteps()
 	}
 	
 	func requestAuthorization() {
@@ -30,49 +32,26 @@ final class HKViewModel {
 		
 		healthStore.requestAuthorization(toShare: nil, read: toRead) { success, error in
 			if success {
-//				self.fetchAllData()
+				print("HealthKit auth success:", success)
 			} else {
 				print("\(String(describing: error))")
 			}
-			
 		}
 	}
 	
-	func fetchAllData() {
-		guard let stepCountType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
-			return
-		}
-		
+	func debugTodaySteps() {
 		let now = Date()
-		let startDate = Calendar.current.startOfDay(for: now)
+		let start = Calendar.current.startOfDay(for: now)
 		
-		let predicate = HKQuery.predicateForSamples(
-			withStart: startDate,
-			end: now,
-			options: .strictStartDate
-		)
-		
-		let query = HKStatisticsQuery(
-			  quantityType: stepCountType, // the data type
-			  quantitySamplePredicate: predicate, // the predicate using the set startDate and endDate
-			  options: .cumulativeSum // to get the total steps
-			) {
-			  _, result, error in
-			  guard let result = result, let sum = result.sumQuantity() else {
-				print("failed to read step count: \(error?.localizedDescription ?? "UNKNOWN ERROR")")
-				return
-			  }
-
-			  let steps = Int(sum.doubleValue(for: HKUnit.count()))
-			  self.todaysSteps = steps
-			}
-		
-		
-		healthStore.execute(query)
+		fetchSteps(from: start, to: now) { steps in
+			print("TODAY STEPS:", steps)
+		}
 	}
+	
 	
 	func fetchSteps(from start: Date, to end: Date, completion: @escaping (Int) -> Void) {
 		guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
+			print("StepCount not found.")
 			completion(0)
 			return
 		}
@@ -80,21 +59,25 @@ final class HKViewModel {
 		let predicate = HKQuery.predicateForSamples(
 			withStart: start,
 			end: end,
-			options: .strictStartDate
+			options: .strictEndDate
 		)
 		
 		let query = HKStatisticsQuery(
 			quantityType: stepType,
 			quantitySamplePredicate: predicate,
 			options: .cumulativeSum
-		) { _, result, error in
+		){ _, result, error in
+			
+			print("Result:", result)
 			
 			guard let sum = result?.sumQuantity() else {
+				print("There is no result.")
 				completion(0)
 				return
 			}
 			
 			let steps = Int(sum.doubleValue(for: HKUnit.count()))
+			
 			completion(steps)
 		}
 		
