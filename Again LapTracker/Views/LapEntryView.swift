@@ -29,7 +29,7 @@ struct LapEntryView: View {
 				VStack(alignment: .leading) {
 					HStack {
 						Text("Duration:")
-						Text("\(lap.duration)")
+						Text("\(lap.duration, format: .number.precision(.fractionLength(2)))")
 							.underline()
 					}
 					
